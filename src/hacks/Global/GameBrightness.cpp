@@ -1,6 +1,6 @@
 #include <modules/config/config.hpp>
 #include <modules/gui/gui.hpp>
-<parameter name="components/float-toggle.hpp">
+#include <modules/components/float-toggle.hpp>
 #include <modules/hack/hack.hpp>
 
 namespace eclipse::hacks::Global {
