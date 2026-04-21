@@ -48,8 +48,6 @@ namespace eclipse::hacks::Creator {
     // we want to disable it
     #if GEODE_COMP_GD_VERSION > 22070
     class $modify(LevelEditEUIHook, EditorUI) {
-        ALL_DELEGATES_AND_SAFE_PRIO("creator.leveledit")
-
         void onSettings(CCObject* sender) {
             auto level = this->m_editorLayer->m_level;
             auto levelType = level->m_levelType;
@@ -60,8 +58,6 @@ namespace eclipse::hacks::Creator {
     };
 
     class $modify(LevelEditEPLHook, EditorPauseLayer) {
-        ALL_DELEGATES_AND_SAFE_PRIO("creator.leveledit")
-
         void customSetup() override {
             auto level = this->m_editorLayer->m_level;
             auto levelType = level->m_levelType;
