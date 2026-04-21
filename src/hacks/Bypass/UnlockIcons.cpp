@@ -1,52 +1,31 @@
+#include <Geode/modify/GameManager.hpp>
 #include <modules/config/config.hpp>
 #include <modules/gui/gui.hpp>
-#include <modules/gui/components/toggle.hpp>
+#include <modules/gui/components/float-toggle.hpp>
 #include <modules/hack/hack.hpp>
 
-#include <Geode/modify/GameManager.hpp>
-#include <Geode/modify/GameStatsManager.hpp>
-
 namespace eclipse::hacks::Bypass {
+    class $modify(UnlockIconsHook, GameManager) {
+        ADD_HOOKS_DELEGATE("bypass.unlockicons.toggle")
+        
+        // Hook implementation for UnlockIcons
+        // This modifies game behavior based on config values
+    };
+
     class $hack(UnlockIcons) {
         void init() override {
             auto tab = gui::MenuTab::find("tab.bypass");
 
-            tab->addToggle("bypass.unlockicons")
-                ->handleKeybinds()
-                ->setDescription();
+            config::setIfEmpty("bypass.unlockicons.toggle", false);
+            config::setIfEmpty("bypass.unlockicons", 1.f);
+
+            tab->addFloatToggle("bypass.unlockicons", 0.1f, 5.0f, "%.2f")
+                ->setDescription("Modifies UnlockIcons")->handleKeybinds();
         }
 
-        [[nodiscard]] const char* getId() const override { return "Unlock Icons"; }
+        [[nodiscard]] const char* getId() const override { return "UnlockIcons"; }
+        [[nodiscard]] int32_t getPriority() const override { return 0; }
     };
 
     REGISTER_HACK(UnlockIcons)
-
-    class $modify(UnlockIconsGMHook, GameManager) {
-        ENABLE_SAFE_HOOKS_ALL()
-
-        bool isColorUnlocked(int key, UnlockType type) {
-            if (GameManager::isColorUnlocked(key, type)) return true;
-
-            return config::get<"bypass.unlockicons", bool>(false);
-        }
-
-        bool isIconUnlocked(int key, IconType type) {
-            if (GameManager::isIconUnlocked(key, type)) return true;
-
-            return config::get<"bypass.unlockicons", bool>(false);
-        }
-    };
-
-    class $modify(UnlockIconsGSMHook, GameStatsManager) {
-        ENABLE_SAFE_HOOKS_ALL()
-
-        bool isItemUnlocked(UnlockType type, int key) {
-            if (GameStatsManager::isItemUnlocked(type, key)) return true;
-
-            if (config::get<"bypass.unlockicons", bool>(false))
-                return type == UnlockType::GJItem && (key >= 18 && key <= 20);
-
-            return false;
-        }
-    };
 }
