@@ -3,6 +3,8 @@
 #include <modules/gui/components/float-toggle.hpp>
 #include <modules/hack/hack.hpp>
 
+#include <Geode/modify/CCMenuItemSpriteExtra.hpp>
+
 namespace eclipse::hacks::Global {
     class $hack(ButtonScale) {
         void init() override {
@@ -20,4 +22,13 @@ namespace eclipse::hacks::Global {
     };
 
     REGISTER_HACK(ButtonScale)
+
+    class $modify(ButtonScaleBtnHook, CCMenuItemSpriteExtra) {
+        ADD_HOOKS_DELEGATE("global.buttonscale")
+
+        void setScale(float scale) override {
+            float buttonScale = config::get<float>("global.buttonscale", 1.f);
+            CCMenuItemSpriteExtra::setScale(scale * buttonScale);
+        }
+    };
 }

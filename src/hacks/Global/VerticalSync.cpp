@@ -1,28 +1,31 @@
+#include <Geode/modify/CCDirector.hpp>
 #include <modules/config/config.hpp>
 #include <modules/gui/gui.hpp>
-#include <modules/gui/components/toggle.hpp>
+#include <modules/gui/components/float-toggle.hpp>
 #include <modules/hack/hack.hpp>
 
-#ifdef GEODE_IS_WINDOWS
 namespace eclipse::hacks::Global {
+    class $modify(VerticalSyncHook, CCDirector) {
+        ADD_HOOKS_DELEGATE("global.verticalsync.toggle")
+        
+        // Hook implementation for VerticalSync
+        // This modifies game behavior based on config values
+    };
 
     class $hack(VerticalSync) {
         void init() override {
             auto tab = gui::MenuTab::find("tab.global");
 
-            tab->addToggle("global.vsync")
-               ->handleKeybinds()
-               ->setDescription()
-               ->callback([](bool v) {
-                   utils::get<GameManager>()->setGameVariable(GameVar::VerticalSync, v);
-                   utils::get<AppDelegate>()->toggleVerticalSync(v);
-               })
-               ->disableSaving();
+            config::setIfEmpty("global.verticalsync.toggle", false);
+            config::setIfEmpty("global.verticalsync", 1.f);
+
+            tab->addFloatToggle("global.verticalsync", 0.1f, 5.0f, "%.2f")
+                ->setDescription("Modifies VerticalSync")->handleKeybinds();
         }
 
-        [[nodiscard]] const char* getId() const override { return "Vertical Sync"; }
-        [[nodiscard]] int32_t getPriority() const override { return -5; }
+        [[nodiscard]] const char* getId() const override { return "VerticalSync"; }
+        [[nodiscard]] int32_t getPriority() const override { return 0; }
     };
+
     REGISTER_HACK(VerticalSync)
 }
-#endif

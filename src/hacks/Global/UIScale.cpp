@@ -3,6 +3,8 @@
 #include <modules/gui/components/float-toggle.hpp>
 #include <modules/hack/hack.hpp>
 
+#include <Geode/modify/CCNode.hpp>
+
 namespace eclipse::hacks::Global {
     class $hack(UIScale) {
         void init() override {
@@ -20,4 +22,13 @@ namespace eclipse::hacks::Global {
     };
 
     REGISTER_HACK(UIScale)
+
+    class $modify(UIScaleCCNodeHook, cocos2d::CCNode) {
+        ADD_HOOKS_DELEGATE("global.uiscale")
+
+        void setScale(float scale) override {
+            float uiScale = config::get<float>("global.uiscale", 1.f);
+            cocos2d::CCNode::setScale(scale * uiScale);
+        }
+    };
 }

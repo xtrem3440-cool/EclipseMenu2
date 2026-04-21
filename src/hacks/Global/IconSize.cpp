@@ -3,6 +3,8 @@
 #include <modules/gui/components/float-toggle.hpp>
 #include <modules/hack/hack.hpp>
 
+#include <Geode/modify/GJListLayer.hpp>
+
 namespace eclipse::hacks::Global {
     class $hack(IconSize) {
         void init() override {
@@ -20,4 +22,16 @@ namespace eclipse::hacks::Global {
     };
 
     REGISTER_HACK(IconSize)
+
+    class $modify(IconSizeGLHook, GJListLayer) {
+        ADD_HOOKS_DELEGATE("global.iconsize")
+
+        void setupList() override {
+            GJListLayer::setupList();
+            float scale = config::get<float>("global.iconsize", 1.f);
+            for (auto child : CCArrayExt<cocos2d::CCNode*>(m_listLayer->m_pChildren)) {
+                if (child) child->setScale(child->getScale() * scale);
+            }
+        }
+    };
 }

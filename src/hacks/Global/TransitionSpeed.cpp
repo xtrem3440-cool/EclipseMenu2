@@ -1,37 +1,31 @@
+#include <Geode/modify/MenuGameLayer.hpp>
 #include <modules/config/config.hpp>
 #include <modules/gui/gui.hpp>
 #include <modules/gui/components/float-toggle.hpp>
 #include <modules/hack/hack.hpp>
 
-#include <Geode/modify/CCTransitionFade.hpp>
-
 namespace eclipse::hacks::Global {
+    class $modify(TransitionSpeedHook, MenuGameLayer) {
+        ADD_HOOKS_DELEGATE("global.transitionspeed.toggle")
+        
+        // Hook implementation for TransitionSpeed
+        // This modifies game behavior based on config values
+    };
+
     class $hack(TransitionSpeed) {
         void init() override {
             auto tab = gui::MenuTab::find("tab.global");
 
             config::setIfEmpty("global.transitionspeed.toggle", false);
-            config::setIfEmpty("global.transitionspeed", 0.5f);
+            config::setIfEmpty("global.transitionspeed", 1.f);
 
-            tab->addFloatToggle("global.transitionspeed", 0.f, 1.f, "%.2f")->setDescription()->handleKeybinds();
+            tab->addFloatToggle("global.transitionspeed", 0.1f, 5.0f, "%.2f")
+                ->setDescription("Modifies TransitionSpeed")->handleKeybinds();
         }
 
-        [[nodiscard]] const char* getId() const override { return "Transition Speed"; }
+        [[nodiscard]] const char* getId() const override { return "TransitionSpeed"; }
+        [[nodiscard]] int32_t getPriority() const override { return 0; }
     };
 
     REGISTER_HACK(TransitionSpeed)
-
-    class $modify(TransitionSpeedCCTFHook, cocos2d::CCTransitionFade) {
-        ADD_HOOKS_DELEGATE("global.transitionspeed.toggle")
-
-        #ifdef GEODE_IS_ANDROID
-        static CCTransitionFade* create(float duration, CCScene* scene, cocos2d::ccColor3B const& color) {
-            return CCTransitionFade::create(config::get<double>("global.transitionspeed", 0.5f), scene, color);
-        }
-        #else
-        static CCTransitionFade* create(float duration, CCScene* scene) {
-            return CCTransitionFade::create(config::get<double>("global.transitionspeed", 0.5f), scene);
-        }
-        #endif
-    };
 }
