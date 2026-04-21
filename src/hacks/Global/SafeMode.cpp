@@ -300,17 +300,16 @@ namespace eclipse::hacks::Global {
             s_attemptCheats["Show Hitboxes"] = true;
         }
 
-        FLAlertLayer* popup;
         if (s_attemptCheats.empty() ) {
-            popup = FLAlertLayer::create(
+            FLAlertLayer::create(
                 nullptr,
                 "Safe Mode (Eclipse)",
                 "<cr>Progress saving is disabled.</c>\n\n"
                 "<cy>Safe Mode is enabled. Progress will NOT be saved for any attempts until you disable Safe Mode.</c>",
                 "OK", nullptr, 400, true, 0, 1
-            );
+            )->show();
         } else {
-            popup = FLAlertLayer::create(
+            FLAlertLayer::create(
                 nullptr,
                 "Safe Mode (Eclipse)",
                 fmt::format(
@@ -321,11 +320,8 @@ namespace eclipse::hacks::Global {
                     AutoSafeMode::constructMessage()
                 ), "OK",
                 nullptr, 400, true, 0, 1
-            );
+            )->show();
         }
-
-        popup->m_scrollingLayer->m_contentLayer->setPositionY(0.f);
-        popup->show();
 
         return true;
     }
@@ -359,7 +355,7 @@ namespace eclipse::hacks::Global {
             return false;
         }
 
-        auto popup = FLAlertLayer::create(
+        FLAlertLayer::create(
             nullptr,
             "Auto-Safe Mode (Eclipse)",
             fmt::format(
@@ -371,22 +367,19 @@ namespace eclipse::hacks::Global {
                 AutoSafeMode::constructMessage()
             ), "OK",
             nullptr, 400, true, 0, 1
-        );
-
-        popup->m_scrollingLayer->m_contentLayer->setPositionY(0.f);
-        popup->show();
+        )->show();
 
         return true;
     }
 
-#define DEFINE_WARN_HOOK(name, cls, ...)           \
+#define DEFINE_WARN_HOOK(name, cls)                \
     class $modify(name, cls) {                     \
         ENABLE_FIRST_HOOKS_ALL()                   \
         struct Fields {                            \
             bool m_shownCheatWarn = false;         \
         };                                         \
         void onPlay(CCObject* sender) {            \
-            if (!m_fields->m_shownCheatWarn __VA_ARGS__) { \
+            if (!m_fields->m_shownCheatWarn) {     \
                 m_fields->m_shownCheatWarn = true; \
                 if (showCheatWarn()) return;       \
             }                                      \
@@ -394,7 +387,7 @@ namespace eclipse::hacks::Global {
         }                                          \
     }
 
-    DEFINE_WARN_HOOK(CheatsEnabledWarnLPHook, LevelPage, && m_level->m_levelID >= 0);
+    DEFINE_WARN_HOOK(CheatsEnabledWarnLPHook, LevelPage);
     DEFINE_WARN_HOOK(CheatsEnabledWarnELLHook, EditLevelLayer);
     DEFINE_WARN_HOOK(CheatsEnabledWarnLILHook, LevelInfoLayer);
 }
