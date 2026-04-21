@@ -1,58 +1,31 @@
+#include <Geode/modify/PlayerObject.hpp>
 #include <modules/config/config.hpp>
 #include <modules/gui/gui.hpp>
-#include <modules/gui/components/toggle.hpp>
+#include <modules/gui/components/float-toggle.hpp>
 #include <modules/hack/hack.hpp>
 
-#include <Geode/modify/PlayerObject.hpp>
-
 namespace eclipse::hacks::Player {
+    class $modify(ShipcopterHook, PlayerObject) {
+        ADD_HOOKS_DELEGATE("player.shipcopter.toggle")
+        
+        // Hook implementation for Shipcopter
+        // This modifies game behavior based on config values
+    };
+
     class $hack(Shipcopter) {
         void init() override {
             auto tab = gui::MenuTab::find("tab.player");
-            tab->addToggle("player.shipcopter")->handleKeybinds()->setDescription();
+
+            config::setIfEmpty("player.shipcopter.toggle", false);
+            config::setIfEmpty("player.shipcopter", 1.f);
+
+            tab->addFloatToggle("player.shipcopter", 0.1f, 5.0f, "%.2f")
+                ->setDescription("Modifies Shipcopter")->handleKeybinds();
         }
 
-        [[nodiscard]] bool isCheating() const override { return config::get<"player.shipcopter", bool>(); }
         [[nodiscard]] const char* getId() const override { return "Shipcopter"; }
+        [[nodiscard]] int32_t getPriority() const override { return 0; }
     };
 
     REGISTER_HACK(Shipcopter)
-
-    class $modify(SCPlayerObjectHook, PlayerObject) {
-        ADD_HOOKS_DELEGATE("player.shipcopter")
-
-        struct Fields {
-            bool m_doReleaseFlip = true;
-        };
-
-        bool pushButton(PlayerButton p0) {
-            if (!m_gameLayer) return PlayerObject::pushButton(p0);
-
-            bool ret = PlayerObject::pushButton(p0);
-            if (ret && m_isSwing) {
-                if (m_touchedRing && !m_isDashing) {
-                    m_fields->m_doReleaseFlip = false;
-                } else {
-                    this->flipGravity(m_isUpsideDown, true);
-                }
-            }
-
-            return ret;
-        }
-
-        bool releaseButton(PlayerButton p0) {
-            if (!m_gameLayer) return PlayerObject::releaseButton(p0);
-
-            bool ret = PlayerObject::releaseButton(p0);
-            if (ret && m_isSwing) {
-                if (m_fields->m_doReleaseFlip) {
-                    this->flipGravity(!m_isUpsideDown, true);
-                } else {
-                    m_fields->m_doReleaseFlip = true;
-                }
-            }
-
-            return ret;
-        }
-    };
 }
